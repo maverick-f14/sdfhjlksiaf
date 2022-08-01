@@ -1,0 +1,52 @@
+version: '2'
+
+services:
+  mysql:
+        image: mysql:latest
+        container_name: docker-mysql
+        restart: always
+        environment:
+          MYSQL_DATABASE: users
+          MYSQL_USER: super
+          MYSQL_PASSWORD: casita
+          MYSQL_ROOT_PASSWORD: casita
+        volumes:
+          - persistencia:/var/lib/mysql
+        ports:
+          - "3306:3306"
+
+
+  phpmyadmin:
+      depends_on:
+        - mysql
+      image: phpmyadmin/phpmyadmin
+      container_name: phpmyadmin
+      restart: always
+      ports:
+        - "8080:80"
+      environment:
+        PMA_HOST: mysql
+
+
+  myapp:
+    image: docker.io/bitnami/laravel:9
+    container_name: rotary
+    ports:
+      - '80:8000'
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USERNAME=super
+      - DB_DATABASE=users
+      - DB_PASSWORD=casita
+    volumes:
+      - './rotary:/app'
+    depends_on:
+      - mysql
+
+
+networks:
+    red:
+        driver: bridge
+volumes:
+  persistencia:
